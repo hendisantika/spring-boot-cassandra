@@ -1,6 +1,7 @@
 package id.my.hendisantika.springbootcassandra.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import id.my.hendisantika.springbootcassandra.dto.BookRequest;
 import id.my.hendisantika.springbootcassandra.model.Book;
 import id.my.hendisantika.springbootcassandra.repository.BookRepository;
 import org.junit.jupiter.api.Test;
@@ -11,12 +12,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -64,5 +65,35 @@ class BookControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$[0].title").value("Sample Book"))
                 .andExpect(jsonPath("$[0].author").value("John Doe"));
+    }
+
+    @Test
+    void shouldCreateBook() throws Exception {
+        // Mock data
+        BookRequest bookRequest = new BookRequest();
+        bookRequest.setTitle("New Book");
+        bookRequest.setDescription("New Description");
+        bookRequest.setAuthor("Jane Doe");
+        bookRequest.setYear(2023);
+
+        Book createdBook = new Book();
+        createdBook.setId(UUID.randomUUID());
+        createdBook.setTitle(bookRequest.getTitle());
+        createdBook.setDescription(bookRequest.getDescription());
+        createdBook.setAuthor(bookRequest.getAuthor());
+        createdBook.setYear(bookRequest.getYear());
+        createdBook.setDateCreated(LocalDateTime.now());
+
+        // Mocking repository behavior
+        when(bookRepository.save(org.mockito.ArgumentMatchers.any())).thenReturn(createdBook);
+
+        // Perform the POST request and verify the response
+        mockMvc.perform(post("/book")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookRequest)))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.title").value("New Book"))
+                .andExpect(jsonPath("$.author").value("Jane Doe"));
     }
 }
