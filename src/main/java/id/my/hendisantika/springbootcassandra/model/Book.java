@@ -1,6 +1,8 @@
 package id.my.hendisantika.springbootcassandra.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
@@ -19,6 +21,8 @@ import java.util.UUID;
  */
 @Data
 @Table("book")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Book {
 
     @PrimaryKey
@@ -33,4 +37,12 @@ public class Book {
     private int year;
 
     private LocalDateTime dateCreated;
+
+    public Book(UUID id, String title, String description, String author, int year) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.author = author;
+        this.year = year;
+    }
 }
